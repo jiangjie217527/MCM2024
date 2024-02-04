@@ -122,7 +122,7 @@ print("equation")
 print(funcFt(N_prey[2], N_pred[2] * 0.3))
 print(dF[1])
 
-t_min = 0  # start at year 0
+t_min = 0  # start at year
 t_max = 25  # end at year 10 (1971)
 t_h = 1e-1
 

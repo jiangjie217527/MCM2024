@@ -102,8 +102,7 @@ r = 2.0213353573062
 beta = 1.50939093249243e-6
 k_M = 0.538704624743195
 
-
-k_F = 7/3*7/3*k_M
+k_F = 7 / 3 * 7 / 3 * k_M
 
 
 # 第0年为1962年
@@ -126,8 +125,10 @@ t_min = 0  # start at year 0
 t_max = 25  # end at year 10 (1971)
 t_h = 1e-1
 
-def rat(m,f):
-    return m/(m+f)
+
+def rat(m, f):
+    return m / (m + f)
+
 
 def work(eta):
     t = np.linspace(t_min, t_max, int((t_max - t_min) / t_h + 1))
@@ -138,7 +139,7 @@ def work(eta):
     n[0] = N_prey[1]
     f[0] = F[1]
     m[0] = M[1]
-    ratio[0] = rat(m[0],f[0])
+    ratio[0] = rat(m[0], f[0])
     # h = t_h
 
     for i in range(t.shape[0] - 1):
@@ -161,7 +162,7 @@ def work(eta):
         n[i + 1] = n[i] + t_h / 6.0 * (k1_n + 2.0 * k2_n + 2.0 * k3_n + k4_n)
         f[i + 1] = f[i] + t_h / 6.0 * (k1_f + 2.0 * k2_f + 2.0 * k3_f + k4_f)
         m[i + 1] = m[i] + t_h / 6.0 * (k1_m + 2.0 * k2_m + 2.0 * k3_m + k4_m)
-        ratio[i+1] = rat(m[i+1], f[i+1])
+        ratio[i + 1] = rat(m[i + 1], f[i + 1])
         # print(k1_f,k2_f,k3_f,k4_f)
 
     data = {
@@ -172,7 +173,7 @@ def work(eta):
         'ratio': ratio
     }
     df = pd.DataFrame(data)
-    df.to_excel('output_eta='+str(eta)+'.xlsx', index=False)
+    df.to_excel('output_eta=' + str(eta) + '.xlsx', index=False)
 
     plt.subplot(1, 3, 1)
     plt.plot(t, n, 'b', label='N_prey')
@@ -198,6 +199,7 @@ def work(eta):
     plt.ylabel('ratio')
     plt.title('ratio-t')
     plt.show()
+
 
 eta = [0.40, 0.42, 0.44, 0.46, 0.48, 0.5]
 for j in range(len(eta)):
