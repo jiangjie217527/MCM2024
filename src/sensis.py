@@ -97,6 +97,8 @@ print(t)
 # print(t)
 # exit(0)
 # argument
+
+
 r_prey = 0.964567701518982
 alpha = 6.82544520966953e-6
 r = -2.0213353573062
@@ -118,74 +120,99 @@ def funcFt(n, f):
     return r * f * (1 - f / K_F) + beta * f * n + k_M * (f * 7 / 3)
 
 
-print("equation")
-print(funcFt(N_prey[2], N_pred[2] * 0.3))
-print(dF[1])
+def work(d):
+    t_min = 0  # start at year
+    t_max = 25  # end at year 10 (1971)
+    t_h = 1e-1
 
-t_min = 0  # start at year
-t_max = 25  # end at year 10 (1971)
-t_h = 1e-1
+    t = np.linspace(t_min, t_max, int((t_max - t_min) / t_h + 1))
+    n = t.copy()
+    f = t.copy()
+    n[0] = N_prey[1]
+    f[0] = F[1]
+    # h = t_h
+    for i in range(t.shape[0] - 1):
+        k1_n = funcNt(n[i], f[i])
+        k1_f = funcFt(n[i], f[i])
 
-t = np.linspace(t_min, t_max, int((t_max - t_min) / t_h + 1))
-n = t.copy()
-f = t.copy()
-n[0] = N_prey[1]
-f[0] = F[1]
-# h = t_h
-for i in range(t.shape[0] - 1):
-    k1_n = funcNt(n[i], f[i])
-    k1_f = funcFt(n[i], f[i])
+        k2_n = funcNt(n[i] + k1_n * t_h / 2.0, f[i])
+        k2_f = funcFt(n[i], f[i] + k1_f * t_h / 2.0)
 
-    k2_n = funcNt(n[i] + k1_n * t_h / 2.0, f[i])
-    k2_f = funcFt(n[i], f[i] + k1_f * t_h / 2.0)
+        k3_n = funcNt(n[i] + k2_n * t_h / 2.0, f[i])
+        k3_f = funcFt(n[i], f[i] + k2_f * t_h / 2.0)
 
-    k3_n = funcNt(n[i] + k2_n * t_h / 2.0, f[i])
-    k3_f = funcFt(n[i], f[i] + k2_f * t_h / 2.0)
+        k4_n = funcNt(n[i] + k3_n * t_h, f[i])
+        k4_f = funcFt(n[i], f[i] + k3_f * t_h)
 
-    k4_n = funcNt(n[i] + k3_n * t_h, f[i])
-    k4_f = funcFt(n[i], f[i] + k3_f * t_h)
+        n[i + 1] = n[i] + t_h / 6.0 * (k1_n + 2.0 * k2_n + 2.0 * k3_n + k4_n)
+        f[i + 1] = f[i] + t_h / 6.0 * (k1_f + 2.0 * k2_f + 2.0 * k3_f + k4_f)
+        # print(k1_f,k2_f,k3_f,k4_f)
 
-    n[i + 1] = n[i] + t_h / 6.0 * (k1_n + 2.0 * k2_n + 2.0 * k3_n + k4_n)
-    f[i + 1] = f[i] + t_h / 6.0 * (k1_f + 2.0 * k2_f + 2.0 * k3_f + k4_f)
-    # print(k1_f,k2_f,k3_f,k4_f)
+    data = {
+        't': t,
+        'N_prey': n,
+        'F': f
+    }
+    df = pd.DataFrame(data)
+    s = 'output'
+    for i in range(len(d)):
+        s += '_' + str(d[i])
+    df.to_excel(s + '.xlsx', index=False)
 
-print(f[0] * 10 / 3)
-print(f[int(t.shape[0] / 3)] * 10 / 3)
-print(f[int(t.shape[0] / 3 * 2)] * 10 / 3)
-print(f[int(t.shape[0] - 1)] * 10 / 3)
-print("n")
-print(n[0])
-print(n[int(t.shape[0] / 3)])
-print(n[int(t.shape[0] / 3 * 2)])
-print(n[int(t.shape[0] - 1)])
-
-# 2008488 11538
-print("delta N")
-print(funcNt(2008488, 11538))
-print("delta F")
-print(funcFt(2008488, 11538))
-
-data = {
-    't':t,
-    'N_prey':n,
-    'F':f
-}
-df = pd.DataFrame(data)
-df.to_excel('output.xlsx', index=False)
+    plt.subplot(1, 2, 1)
+    plt.plot(t, n, 'b', label='N_prey')
+    plt.legend()
+    plt.xlabel('t_year')
+    plt.ylabel('number')
+    plt.title('n-t')
+    # t[int(t.shape[0]/8*4):int(t.shape[0]/8*8)], n[int(t.shape[0]/8*4):int(t.shape[0]/8*8)]
+    plt.subplot(1, 2, 2)
+    plt.plot(t, f, 'r--',
+             label='F')
+    plt.legend()
+    plt.xlabel('t_year')
+    plt.ylabel('number')
+    plt.title('n-t')
+    plt.show()
 
 
-plt.subplot(1, 2, 1)
-plt.plot(t, n, 'b', label='N_prey')
-plt.legend()
-plt.xlabel('t_year')
-plt.ylabel('number')
-plt.title('n-t')
-# t[int(t.shape[0]/8*4):int(t.shape[0]/8*8)], n[int(t.shape[0]/8*4):int(t.shape[0]/8*8)]
-plt.subplot(1, 2, 2)
-plt.plot(t, f, 'r--',
-         label='F')
-plt.legend()
-plt.xlabel('t_year')
-plt.ylabel('number')
-plt.title('n-t')
-plt.show()
+delta = [[0, 0, 0, 0, 0],
+         [0.02, 0, 0, 0, 0],
+         [0.04, 0, 0, 0, 0],
+         [0, 0.02, 0, 0, 0],
+         [0, 0.04, 0, 0, 0],
+         [0, 0, 0.02, 0, 0],
+         [0, 0, 0.04, 0, 0],
+         [0, 0, 0, 0.02, 0],
+         [0, 0, 0, 0.04, 0],
+         [0, 0, 0, 0, 0.02],
+         [0, 0, 0, 0, 0.04],
+         [-0.02, 0, 0, 0, 0],
+         [-0.04, 0, 0, 0, 0],
+         [0, -0.02, 0, 0, 0],
+         [0, -0.04, 0, 0, 0],
+         [0, 0, -0.02, 0, 0],
+         [0, 0, -0.04, 0, 0],
+         [0, 0, 0, -0.02, 0],
+         [0, 0, 0, -0.04, 0],
+         [0, 0, 0, 0, -0.02],
+         [0, 0, 0, 0, -0.04],
+         ]
+
+for i in range(len(delta)):
+    delta_r_prey = r_prey * delta[i][0]
+    delta_alpha = alpha * delta[i][1]
+    delta_r = r * delta[i][2]
+    delta_beta = beta * delta[i][3]
+    delta_k_M = k_M * delta[i][4]
+    r_prey += delta_r_prey
+    alpha += delta_alpha
+    r += delta_r
+    beta += delta_beta
+    k_M += delta_k_M
+    work(delta[i])
+    r_prey -= delta_r_prey
+    alpha -= delta_alpha
+    r -= delta_r
+    beta -= delta_beta
+    k_M -= delta_k_M

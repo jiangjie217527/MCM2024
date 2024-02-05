@@ -48,11 +48,11 @@ K_F = 468700000000000000000  # 环境承载力
 # equations about N
 
 
-r_pery, alpha = sympy.symbols("x,y")
-eq1 = N_prey[2] * r_pery * (1 - N_prey[2] / K_R) - N_prey[2] * N_pred[2] * alpha - dN_prey[1]
-eq2 = N_prey[3] * r_pery * (1 - N_prey[3] / K_R) - N_prey[3] * N_pred[3] * alpha - dN_prey[2]
-s = sympy.solve([eq1, eq2], [r_pery, alpha])
-print(list(s.values()))
+# r_pery, alpha = sympy.symbols("x,y")
+# eq1 = N_prey[2] * r_pery * (1 - N_prey[2] / K_R) - N_prey[2] * N_pred[2] * alpha - dN_prey[1]
+# eq2 = N_prey[3] * r_pery * (1 - N_prey[3] / K_R) - N_prey[3] * N_pred[3] * alpha - dN_prey[2]
+# s = sympy.solve([eq1, eq2], [r_pery, alpha])
+# print(list(s.values()))
 
 # equations about F
 
@@ -96,11 +96,14 @@ print(list(s.values()))
 # print(t)
 # exit(0)
 # argument
+
 r_prey = 0.964567701518982
 alpha = 6.82544520966953e-6
 r = 2.0213353573062
 beta = 1.50939093249243e-6
 k_M = 0.538704624743195
+human = 2
+
 
 k_F = 7 / 3 * 7 / 3 * k_M
 
@@ -112,13 +115,12 @@ def funcNt(n, f, m):
 
 
 def funcFt(n, f, m, eta):
-    # print(r * f * (1 - f / K_F) + beta * f * n + k_M * (f * 7 / 3))
-    return -2 * (1 - eta) * r * f + beta * f * n + k_M * m
+    return -2 * (1 - eta) * r * f + beta * f * n + k_M * m - human * f
 
 
 def funcMt(n, m, f, eta):
     # print(r * f * (1 - f / K_F) + beta * f * n + k_M * (f * 7 / 3))
-    return -2 * eta * r * m + beta * m * n + k_F * f
+    return -2 * eta * r * m + beta * m * n + k_F * f - human * m
 
 
 t_min = 0  # start at year 0
@@ -162,7 +164,16 @@ def work(eta):
         n[i + 1] = n[i] + t_h / 6.0 * (k1_n + 2.0 * k2_n + 2.0 * k3_n + k4_n)
         f[i + 1] = f[i] + t_h / 6.0 * (k1_f + 2.0 * k2_f + 2.0 * k3_f + k4_f)
         m[i + 1] = m[i] + t_h / 6.0 * (k1_m + 2.0 * k2_m + 2.0 * k3_m + k4_m)
-        ratio[i + 1] = rat(m[i + 1], f[i + 1])
+        if m[i+1] < 0:
+            m[i+1] = 0
+        if f[i+1] < 0:
+            f[i+1] =0
+        if n[i+1] < 0:
+            n[i+1] = 0
+        if m[i+1] == 0 and f[i+1] == 0:
+            ratio = 0.5
+        else:
+            ratio[i + 1] = rat(m[i + 1], f[i + 1])
         # print(k1_f,k2_f,k3_f,k4_f)
 
     data = {
@@ -201,6 +212,6 @@ def work(eta):
     plt.show()
 
 
-eta = [0.40, 0.42, 0.44, 0.46, 0.48, 0.5]
-for j in range(len(eta)):
-    work(eta[j])
+eta = [0.60, 0.58, 0.56, 0.54, 0.52, 0.5]
+# for j in range(len(eta)):
+work(eta[5])
